@@ -2,10 +2,11 @@
   "name": "third-side-payload",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "payload migrate && next start",
     "generate:types": "payload generate:types",
     "generate:importmap": "payload generate:importmap"
   },
