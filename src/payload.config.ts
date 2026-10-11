@@ -66,6 +66,11 @@ export default buildConfig({
       collections: {
         media: {
           prefix: 'payload-media',
+          // Without this, Payload serves media through its own
+          // /api/media/file/* proxy route instead of a direct S3 url —
+          // fine when the request hits the Payload server, but the
+          // frontend resolves that path against its own domain and 404s.
+          disablePayloadAccessControl: true,
         },
       },
       bucket: process.env.S3_BUCKET || '',
