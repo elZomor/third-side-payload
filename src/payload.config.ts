@@ -1,5 +1,11 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
-import { BlocksFeature, FixedToolbarFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
+import {
+  BlocksFeature,
+  defaultColors,
+  FixedToolbarFeature,
+  lexicalEditor,
+  TextStateFeature,
+} from '@payloadcms/richtext-lexical'
 import { s3Storage } from '@payloadcms/storage-s3'
 import path from 'path'
 import { buildConfig } from 'payload'
@@ -23,6 +29,21 @@ export default buildConfig({
       ...defaultFeatures,
       FixedToolbarFeature(),
       BlocksFeature({ blocks: [VideoEmbed] }),
+      // Font size and text color controls. Stored as flat state keys on the
+      // text node (`node.fontSize`, `node.color`) rather than arbitrary CSS,
+      // so the frontend renderer maps these same keys to CSS itself
+      // (see third_side_frontend/app/components/LexicalContent.tsx).
+      TextStateFeature({
+        state: {
+          fontSize: {
+            sm: { css: { 'font-size': '0.875rem' }, label: 'Small' },
+            base: { css: { 'font-size': '1rem' }, label: 'Normal' },
+            lg: { css: { 'font-size': '1.25rem' }, label: 'Large' },
+            xl: { css: { 'font-size': '1.5rem' }, label: 'Extra Large' },
+          },
+          color: { ...defaultColors.text },
+        },
+      }),
     ],
   }),
   localization: {
