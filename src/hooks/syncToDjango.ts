@@ -99,8 +99,19 @@ export const syncToDjango: CollectionAfterChangeHook = async ({ doc, operation, 
     }
   }
 
-  const contentByLocale = (fullDoc as unknown as { content?: Record<string, { root?: LexicalNode } | undefined> })
-    .content
+  // The locale patch-back above can point fullDoc.content[savedLocale] at
+  // the very same object as doc.content (not a copy). populateUploadNodes
+  // mutates nodes in place to swap each upload node's `value` from an id to
+  // the populated media doc for Django's benefit — on a shared reference,
+  // that mutation would leak into `doc`, which is what gets serialized back
+  // to the admin as the save response. The admin's Lexical editor rejects a
+  // populated upload value (it expects a plain id), so that leak surfaced
+  // as "Upload value should be a string or number" right after saving,
+  // even though the save itself had already succeeded. Clone before
+  // mutating so this walk can never touch anything reachable from `doc`.
+  const contentByLocale = structuredClone(
+    (fullDoc as unknown as { content?: Record<string, { root?: LexicalNode } | undefined> }).content
+  )
   if (contentByLocale) {
     const mediaCache = new Map<string, unknown>()
     await Promise.all(
@@ -112,7 +123,7 @@ export const syncToDjango: CollectionAfterChangeHook = async ({ doc, operation, 
 
   // Fire-and-forget: the admin save shouldn't hang on Django's
   // availability or response time. Errors are logged inside postToDjango.
-  void postToDjango({ operation, doc: fullDoc })
+  void postToDjango({ operation, doc: { ...fullDoc, content: contentByLocale } })
   return doc
 }
 
