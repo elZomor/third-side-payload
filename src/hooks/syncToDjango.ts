@@ -17,6 +17,7 @@ async function postToDjango(body: Record<string, unknown>): Promise<void> {
         'X-Webhook-Secret': secret,
       },
       body: JSON.stringify(body),
+      signal: AbortSignal.timeout(10_000),
     })
 
     if (!res.ok) {
@@ -54,11 +55,13 @@ export const syncToDjango: CollectionAfterChangeHook = async ({ doc, operation, 
     }
   }
 
-  await postToDjango({ operation, doc: fullDoc })
+  // Fire-and-forget: the admin save shouldn't hang on Django's
+  // availability or response time. Errors are logged inside postToDjango.
+  void postToDjango({ operation, doc: fullDoc })
   return doc
 }
 
 export const syncDeleteToDjango: CollectionAfterDeleteHook = async ({ doc }) => {
-  await postToDjango({ operation: 'delete', doc })
+  void postToDjango({ operation: 'delete', doc })
   return doc
 }
