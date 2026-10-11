@@ -3,6 +3,7 @@ import * as migration_20261011_143408_add_localization from './20261011_143408_a
 import * as migration_20261011_162444_add_media from './20261011_162444_add_media';
 import * as migration_20261011_202600_add_users_api_key from './20261011_202600_add_users_api_key';
 import * as migration_20261011_213000_articles_status_review_workflow from './20261011_213000_articles_status_review_workflow';
+import * as migration_20261011_213500_articles_status_default from './20261011_213500_articles_status_default';
 
 export const migrations = [
   {
@@ -29,5 +30,10 @@ export const migrations = [
     up: migration_20261011_213000_articles_status_review_workflow.up,
     down: migration_20261011_213000_articles_status_review_workflow.down,
     name: '20261011_213000_articles_status_review_workflow',
+  },
+  {
+    up: migration_20261011_213500_articles_status_default.up,
+    down: migration_20261011_213500_articles_status_default.down,
+    name: '20261011_213500_articles_status_default',
   },
 ];

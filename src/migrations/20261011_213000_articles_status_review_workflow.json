@@ -252,7 +252,7 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "'ready_for_review'"
+          "default": "'draft'"
         },
         "published_at": {
           "name": "published_at",
@@ -1235,6 +1235,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "7acb901f-8a6b-4d66-a0d3-27aecbd04eef",
+  "id": "1824d4e1-eff0-4c04-afeb-214398b2144c",
   "prevId": "225b54c2-1bc1-47fa-9d3d-be21dba25fb1"
 }
