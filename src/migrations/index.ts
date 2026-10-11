@@ -1,9 +1,15 @@
 import * as migration_20261010_125555_initial from './20261010_125555_initial';
+import * as migration_20261011_143408_add_localization from './20261011_143408_add_localization';
 
 export const migrations = [
   {
     up: migration_20261010_125555_initial.up,
     down: migration_20261010_125555_initial.down,
-    name: '20261010_125555_initial'
+    name: '20261010_125555_initial',
+  },
+  {
+    up: migration_20261011_143408_add_localization.up,
+    down: migration_20261011_143408_add_localization.down,
+    name: '20261011_143408_add_localization'
   },
 ];

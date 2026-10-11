@@ -27,10 +27,20 @@ async function postToDjango(body: Record<string, unknown>): Promise<void> {
   }
 }
 
-export const syncToDjango: CollectionAfterChangeHook = async ({ doc, operation }) => {
+export const syncToDjango: CollectionAfterChangeHook = async ({ doc, operation, req }) => {
   if (doc.status !== 'published') return doc
 
-  await postToDjango({ operation, doc })
+  // `doc` only carries the locale that was just saved. Fetch the full
+  // multi-locale document so title/slug/content for every locale reach
+  // Django in one go, instead of overwriting each other on every save.
+  const fullDoc = await req.payload.findByID({
+    collection: 'articles',
+    id: doc.id,
+    locale: 'all',
+    depth: 0,
+  })
+
+  await postToDjango({ operation, doc: fullDoc })
   return doc
 }
 
