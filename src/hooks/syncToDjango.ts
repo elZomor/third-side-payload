@@ -46,11 +46,16 @@ export const syncToDjango: CollectionAfterChangeHook = async ({ doc, operation, 
   // value even though `doc.updatedAt` is current). `doc` is the actual
   // result of this save, so it's authoritative for whichever locale was
   // just written — patch it back over the refetched value for that locale.
+  // `locale: 'all'` makes each localized field an object keyed by locale
+  // at runtime, which the generated single-locale types don't model, so
+  // this patch step works through an untyped view of the document.
   const savedLocale = req.locale
   if (savedLocale) {
+    const fullDocFields = fullDoc as unknown as Record<string, Record<string, unknown> | undefined>
+    const docFields = doc as unknown as Record<string, unknown>
     for (const field of ['title', 'slug', 'content'] as const) {
-      if (doc[field] !== undefined) {
-        fullDoc[field] = { ...fullDoc[field], [savedLocale]: doc[field] }
+      if (docFields[field] !== undefined) {
+        fullDocFields[field] = { ...fullDocFields[field], [savedLocale]: docFields[field] }
       }
     }
   }
