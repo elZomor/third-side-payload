@@ -40,6 +40,20 @@ export const syncToDjango: CollectionAfterChangeHook = async ({ doc, operation, 
     depth: 0,
   })
 
+  // The locale-scoped refetch above can lag behind the write that just
+  // happened (seen in practice: a locale's field reverting to an older
+  // value even though `doc.updatedAt` is current). `doc` is the actual
+  // result of this save, so it's authoritative for whichever locale was
+  // just written — patch it back over the refetched value for that locale.
+  const savedLocale = req.locale
+  if (savedLocale) {
+    for (const field of ['title', 'slug', 'content'] as const) {
+      if (doc[field] !== undefined) {
+        fullDoc[field] = { ...fullDoc[field], [savedLocale]: doc[field] }
+      }
+    }
+  }
+
   await postToDjango({ operation, doc: fullDoc })
   return doc
 }
