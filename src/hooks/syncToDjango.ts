@@ -34,11 +34,14 @@ export const syncToDjango: CollectionAfterChangeHook = async ({ doc, operation, 
   // `doc` only carries the locale that was just saved. Fetch the full
   // multi-locale document so title/slug/content for every locale reach
   // Django in one go, instead of overwriting each other on every save.
+  // depth: 2 so upload nodes inside richText content (e.g. images) resolve
+  // to their full media document (with a usable url) instead of a bare
+  // media ID Django/the frontend would have no way to turn into a URL.
   const fullDoc = await req.payload.findByID({
     collection: 'articles',
     id: doc.id,
     locale: 'all',
-    depth: 0,
+    depth: 2,
   })
 
   // The locale-scoped refetch above can lag behind the write that just
