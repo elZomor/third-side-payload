@@ -1,4 +1,40 @@
-import type { CollectionAfterChangeHook, CollectionAfterDeleteHook } from 'payload'
+import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, Payload } from 'payload'
+
+type LexicalNode = {
+  type?: string
+  relationTo?: string
+  value?: unknown
+  children?: LexicalNode[]
+  [key: string]: unknown
+}
+
+// `depth` on findByID doesn't reach into richText content when combined
+// with `locale: 'all'` — upload nodes still come back as a bare media id
+// (verified against the actual synced payload). Walk the tree ourselves
+// and swap each unpopulated upload node's value for the real media doc,
+// so Django/the frontend get a usable url instead of a number.
+async function populateUploadNodes(node: LexicalNode, payload: Payload, cache: Map<string, unknown>) {
+  if (node.type === 'upload' && node.relationTo && node.value !== undefined && typeof node.value !== 'object') {
+    const cacheKey = `${node.relationTo}:${node.value}`
+    if (!cache.has(cacheKey)) {
+      try {
+        const media = await payload.findByID({
+          collection: node.relationTo as 'media',
+          id: node.value as string | number,
+          depth: 0,
+        })
+        cache.set(cacheKey, media)
+      } catch {
+        cache.set(cacheKey, node.value)
+      }
+    }
+    node.value = cache.get(cacheKey)
+  }
+
+  if (node.children) {
+    await Promise.all(node.children.map((child) => populateUploadNodes(child, payload, cache)))
+  }
+}
 
 async function postToDjango(body: Record<string, unknown>): Promise<void> {
   const url = process.env.DJANGO_WEBHOOK_URL
@@ -34,14 +70,14 @@ export const syncToDjango: CollectionAfterChangeHook = async ({ doc, operation, 
   // `doc` only carries the locale that was just saved. Fetch the full
   // multi-locale document so title/slug/content for every locale reach
   // Django in one go, instead of overwriting each other on every save.
-  // depth: 2 so upload nodes inside richText content (e.g. images) resolve
-  // to their full media document (with a usable url) instead of a bare
-  // media ID Django/the frontend would have no way to turn into a URL.
+  // (depth doesn't populate relations nested inside richText content when
+  // combined with locale: 'all' — see populateUploadNodes below, which
+  // handles upload nodes manually instead.)
   const fullDoc = await req.payload.findByID({
     collection: 'articles',
     id: doc.id,
     locale: 'all',
-    depth: 2,
+    depth: 0,
   })
 
   // The locale-scoped refetch above can lag behind the write that just
@@ -61,6 +97,17 @@ export const syncToDjango: CollectionAfterChangeHook = async ({ doc, operation, 
         fullDocFields[field] = { ...fullDocFields[field], [savedLocale]: docFields[field] }
       }
     }
+  }
+
+  const contentByLocale = (fullDoc as unknown as { content?: Record<string, { root?: LexicalNode } | undefined> })
+    .content
+  if (contentByLocale) {
+    const mediaCache = new Map<string, unknown>()
+    await Promise.all(
+      Object.values(contentByLocale).map((localeContent) =>
+        localeContent?.root ? populateUploadNodes(localeContent.root, req.payload, mediaCache) : undefined
+      )
+    )
   }
 
   // Fire-and-forget: the admin save shouldn't hang on Django's
