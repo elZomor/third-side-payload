@@ -16,6 +16,6 @@ export const migrations = [
   {
     up: migration_20261011_162444_add_media.up,
     down: migration_20261011_162444_add_media.down,
-    name: '20261011_162444_add_media'
+    name: '20261011_162444_add_media',
   },
 ];

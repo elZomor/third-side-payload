@@ -1,10 +1,11 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
-import { FixedToolbarFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
+import { BlocksFeature, FixedToolbarFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import { s3Storage } from '@payloadcms/storage-s3'
 import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 
+import { VideoEmbed } from './blocks/VideoEmbed'
 import { Articles } from './collections/Articles'
 import { Media } from './collections/Media'
 import { Users } from './collections/Users'
@@ -18,7 +19,11 @@ export default buildConfig({
   },
   collections: [Users, Articles, Media],
   editor: lexicalEditor({
-    features: ({ defaultFeatures }) => [...defaultFeatures, FixedToolbarFeature()],
+    features: ({ defaultFeatures }) => [
+      ...defaultFeatures,
+      FixedToolbarFeature(),
+      BlocksFeature({ blocks: [VideoEmbed] }),
+    ],
   }),
   localization: {
     locales: ['ar', 'en'],
