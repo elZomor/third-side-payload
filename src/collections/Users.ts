@@ -5,6 +5,8 @@ export const Users: CollectionConfig = {
   admin: {
     useAsTitle: 'email',
   },
-  auth: true,
+  // useAPIKey lets Django authenticate as a Payload user (Authorization:
+  // users API-Key <key>) to create articles via the REST API.
+  auth: { useAPIKey: true },
   fields: [],
 }

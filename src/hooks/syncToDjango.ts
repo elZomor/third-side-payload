@@ -65,7 +65,9 @@ async function postToDjango(body: Record<string, unknown>): Promise<void> {
 }
 
 export const syncToDjango: CollectionAfterChangeHook = async ({ doc, operation, req }) => {
-  if (doc.status !== 'published') return doc
+  // Payload no longer has a terminal "published" state of its own — the
+  // review workflow (ready_for_review/in_review/approved/rejected) lives
+  // here, and Django reacts to each status on its side. Push every save.
 
   // `doc` only carries the locale that was just saved. Fetch the full
   // multi-locale document so title/slug/content for every locale reach

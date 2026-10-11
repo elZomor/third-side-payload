@@ -32,8 +32,8 @@ export const Articles: CollectionConfig = {
     {
       name: 'status',
       type: 'select',
-      options: ['draft', 'published'],
-      defaultValue: 'draft',
+      options: ['ready_for_review', 'in_review', 'approved', 'rejected'],
+      defaultValue: 'ready_for_review',
       required: true,
     },
     {
