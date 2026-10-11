@@ -66,11 +66,13 @@ export default buildConfig({
       collections: {
         media: {
           prefix: 'payload-media',
-          // Without this, Payload serves media through its own
-          // /api/media/file/* proxy route instead of a direct S3 url —
-          // fine when the request hits the Payload server, but the
-          // frontend resolves that path against its own domain and 404s.
-          disablePayloadAccessControl: true,
+          // tickets-be fronts this same S3 bucket with a Cloudflare Worker
+          // at media.play-cast.com/<key> (see e.g. show/serializer.py in
+          // that repo) rather than serving S3 directly — match that here
+          // instead of Payload's own /api/media/file/* proxy route, which
+          // only resolves against the Payload server, not the frontend.
+          generateFileURL: ({ filename, prefix }) =>
+            `https://media.play-cast.com/${prefix ? `${prefix}/` : ''}${filename}`,
         },
       },
       bucket: process.env.S3_BUCKET || '',
