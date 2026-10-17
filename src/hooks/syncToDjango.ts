@@ -120,7 +120,7 @@ export const syncToDjango: CollectionAfterChangeHook = async ({ doc, operation, 
     if (savedLocale) {
       const fullDocFields = fullDoc as unknown as Record<string, Record<string, unknown> | undefined>
       const docFields = doc as unknown as Record<string, unknown>
-      for (const field of ['title', 'slug', 'content', 'aiGenerated'] as const) {
+      for (const field of ['title', 'slug', 'content', 'isOriginalLanguage', 'aiGenerated'] as const) {
         if (docFields[field] !== undefined) {
           fullDocFields[field] = { ...fullDocFields[field], [savedLocale]: docFields[field] }
         }
