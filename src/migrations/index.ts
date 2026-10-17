@@ -4,6 +4,7 @@ import * as migration_20261011_162444_add_media from './20261011_162444_add_medi
 import * as migration_20261011_202600_add_users_api_key from './20261011_202600_add_users_api_key';
 import * as migration_20261011_213000_articles_status_review_workflow from './20261011_213000_articles_status_review_workflow';
 import * as migration_20261011_213500_articles_status_default from './20261011_213500_articles_status_default';
+import * as migration_20261017_120000_add_ro_locale from './20261017_120000_add_ro_locale';
 
 export const migrations = [
   {
@@ -35,5 +36,10 @@ export const migrations = [
     up: migration_20261011_213500_articles_status_default.up,
     down: migration_20261011_213500_articles_status_default.down,
     name: '20261011_213500_articles_status_default',
+  },
+  {
+    up: migration_20261017_120000_add_ro_locale.up,
+    down: migration_20261017_120000_add_ro_locale.down,
+    name: '20261017_120000_add_ro_locale',
   },
 ];
