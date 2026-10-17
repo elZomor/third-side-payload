@@ -30,6 +30,18 @@ export const Articles: CollectionConfig = {
       localized: true,
     },
     {
+      // Per language: tick when that language's text was machine-translated.
+      // Shown as an "AI" tag on the site. Ignored for the original language.
+      name: 'aiGenerated',
+      type: 'checkbox',
+      localized: true,
+      defaultValue: false,
+      label: 'AI-generated translation',
+      admin: {
+        description: 'Tick for a language whose text was machine-translated. Untick once a person has reviewed it.',
+      },
+    },
+    {
       name: 'status',
       type: 'select',
       options: ['ready_for_review', 'in_review', 'approved', 'rejected'],
