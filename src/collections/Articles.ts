@@ -30,6 +30,18 @@ export const Articles: CollectionConfig = {
       localized: true,
     },
     {
+      // Per language: tick on the language the article was originally written
+      // in (exactly one). The site shows the other languages as translations.
+      name: 'isOriginalLanguage',
+      type: 'checkbox',
+      localized: true,
+      defaultValue: false,
+      label: 'Original language',
+      admin: {
+        description: 'Tick on the language this article was originally written in (one language only).',
+      },
+    },
+    {
       // Per language: tick when that language's text was machine-translated.
       // Shown as an "AI" tag on the site. Ignored for the original language.
       name: 'aiGenerated',
@@ -38,7 +50,9 @@ export const Articles: CollectionConfig = {
       defaultValue: false,
       label: 'AI-generated translation',
       admin: {
-        description: 'Tick for a language whose text was machine-translated. Untick once a person has reviewed it.',
+        description: 'Tick for a language whose text was machine-translated. Untick once a person has reviewed it. Not used for the original language.',
+        // Nothing to flag on the original language.
+        condition: (_data, siblingData) => !siblingData?.isOriginalLanguage,
       },
     },
     {
