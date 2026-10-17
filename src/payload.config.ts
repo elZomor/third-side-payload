@@ -47,7 +47,7 @@ export default buildConfig({
     ],
   }),
   localization: {
-    locales: ['ar', 'en'],
+    locales: ['ar', 'en', 'ro'],
     defaultLocale: 'ar',
   },
   secret: process.env.PAYLOAD_SECRET || '',
